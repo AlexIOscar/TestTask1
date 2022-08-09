@@ -25,7 +25,18 @@ public class Main {
         strRepl("C:\\testDir", "dolor", "lalala");
     }
 
+    /**
+     * Replace all target-sequences(oldSeq) with new sequence (newSeq) in all files from subdirectories of path
+     *
+     * @param path   the target directory
+     * @param oldSeq the sequence to be replaced
+     * @param newSeq the replacement sequence
+     */
+    @SuppressWarnings("ConstantConditions")
     public static void strRepl(String path, String oldSeq, String newSeq) {
+
+        //debug tool. Should switch it to "false" to work
+        boolean testMode = false;
 
         //the qty of signs before and after target in the log
         int overlap = 6;
@@ -89,12 +100,9 @@ public class Main {
                 //System.out.println(out);
                 file_logger.info(getLogBlock(inputText, posMap, oldSeq, newSeq, overlap));
 
-                //to be replaced for out!
-                String outText = inputText;
-
                 try (BufferedWriter bw =
                              new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "CP1251"))) {
-                    bw.write(outText);
+                    bw.write(testMode ? inputText : out);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                     file_logger.error("File writing err: {}", p.toString());
@@ -110,6 +118,11 @@ public class Main {
      * @param repl     the replacement sequence
      * @param overlap  the width overlap before and after replacement block (for log line)
      * @return general info block about replacements for logging
+     */
+    /*
+    TODO: Не очень хорошее решение: замена в итоге за всю программу производится дважды, один раз в основной части, и
+     один раз - для лога. Лучше (но немного сложнее) вычислить смещения индексов в файле-замене, и вытаскивать
+     подстроки непосредственно из него (передавая его как еще один  аргумент).
      */
     public static String getLogBlock(String source, List<Integer> indexMap, String target, String repl, int overlap) {
         StringBuilder sb = new StringBuilder("Replacements:\n");
